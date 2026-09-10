@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-canvas-50 text-ink-900 antialiased;
+    font-family: Inter, Arial, sans-serif;
+    font-feature-settings: 'tnum' 1, 'ss01' 1;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-ink-900;
+    font-family: Manrope, Inter, Arial, sans-serif;
+  }
+
+  ::selection {
+    background: rgba(51, 122, 183, 0.20);
+  }
+
+  :focus-visible {
+    outline: 2px solid #337AB7;
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Leaflet base overrides */
+
+.leaflet-container {
+  background: transparent;
+  font-family: Inter, Arial, sans-serif;
+}
+
+.leaflet-control-attribution {
+  display: none;
+}
+
+@keyframes helpline-ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.helpline-ticker-track {
+  animation: helpline-ticker 22s linear infinite;
+}
+
+.helpline-ticker-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .helpline-ticker-track {
+    animation: none;
+  }
+}
