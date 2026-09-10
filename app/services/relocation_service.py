@@ -21,8 +21,13 @@ def calculate_distance_km(
 
     earth_radius_km = 6371
 
-    latitude_difference = radians(latitude_2 - latitude_1)
-    longitude_difference = radians(longitude_2 - longitude_1)
+    latitude_difference = radians(
+        latitude_2 - latitude_1
+    )
+
+    longitude_difference = radians(
+        longitude_2 - longitude_1
+    )
 
     a = (
         sin(latitude_difference / 2) ** 2
@@ -32,8 +37,10 @@ def calculate_distance_km(
     )
 
     return round(
-        2 * earth_radius_km * asin(sqrt(a)),
         2
+        * earth_radius_km
+        * asin(sqrt(a)),
+        2,
     )
 
 
@@ -43,26 +50,26 @@ def calculate_suitability_score(
     distance_km: float,
 ) -> float:
     """
-    Calculate a transparent prototype suitability score
-    using fields available in the real relocation dataset.
+    Calculate a transparent relocation-site
+    suitability score.
+
+    Population is optional because the current
+    habitation dataset does not contain population.
     """
 
-    # Capacity score
     if population > 0:
         capacity_score = min(
             (site.capacity / population) * 100,
-            100
+            100,
         )
     else:
         capacity_score = 0
 
-    # Toilet score
     toilet_score = min(
         (site.toilets / max(population, 1)) * 100,
-        100
+        100,
     )
 
-    # Child-friendly facility score
     child_space_text = str(
         site.child_friendly_space
     ).strip().lower()
@@ -78,14 +85,12 @@ def calculate_suitability_score(
         else 0
     )
 
-    # Distance score
-    # Closer relocation sites receive a higher score.
+    # Closer sites receive a higher distance score.
     distance_score = max(
         0,
-        100 - (distance_km * 5)
+        100 - (distance_km * 5),
     )
 
-    # Final suitability score
     suitability_score = (
         capacity_score * 0.45
         + toilet_score * 0.20
@@ -95,7 +100,7 @@ def calculate_suitability_score(
 
     return round(
         suitability_score,
-        2
+        2,
     )
 
 
@@ -103,21 +108,37 @@ def find_suitable_relocation_sites(
     habitation: Habitation,
     sites: list[RelocationSite],
     population: int = 0,
+    max_results: int = 5,
 ) -> list[dict]:
     """
-    Find suitable relocation sites and rank them by suitability.
+    Find the nearest active relocation sites
+    for an affected habitation.
 
-    Population is supplied separately because the current
-    habitation dataset does not contain a population field.
+    Process:
+        1. Remove inactive/unavailable sites.
+        2. Check population capacity only if
+           population data is available.
+        3. Calculate distance from the affected
+           habitation to every relocation site.
+        4. Calculate a suitability score.
+        5. Sort primarily by geographic distance.
+        6. Return only the nearest sites.
+
+    Since the current habitation dataset does not
+    contain population, population-based capacity
+    filtering is not performed.
     """
 
     suitable_sites = []
 
     for site in sites:
 
-        # Skip only clearly unusable sites.
-        status = str(site.status).strip().lower()
+        # Normalize site status.
+        status = str(
+            site.status
+        ).strip().lower()
 
+        # Ignore sites that are not operational.
         if status in {
             "inactive",
             "closed",
@@ -126,14 +147,17 @@ def find_suitable_relocation_sites(
         }:
             continue
 
-        # Capacity check
-        if population > 0 and not can_accommodate_population(
-            site,
-            population
-        ):
-            continue
+        # Only perform capacity filtering when
+        # actual population is provided.
+        if population > 0:
+            if not can_accommodate_population(
+                site,
+                population,
+            ):
+                continue
 
-        # Calculate distance
+        # Calculate distance from the affected
+        # habitation to the relocation site.
         distance_km = calculate_distance_km(
             habitation.latitude,
             habitation.longitude,
@@ -141,7 +165,7 @@ def find_suitable_relocation_sites(
             site.longitude,
         )
 
-        # Calculate suitability score
+        # Calculate additional site information.
         suitability_score = calculate_suitability_score(
             site,
             population,
@@ -151,15 +175,20 @@ def find_suitable_relocation_sites(
         suitable_sites.append(
             {
                 "site": site,
-                "site_capacity": get_site_capacity(site),
+                "site_capacity": get_site_capacity(
+                    site
+                ),
                 "distance_km": distance_km,
                 "suitability_score": suitability_score,
             }
         )
 
-    # Highest suitability score first
-    return sorted(
-        suitable_sites,
-        key=lambda item: item["suitability_score"],
-        reverse=True,
+    # IMPORTANT:
+    # The user's requirement is to show sites
+    # nearest to the affected area.
+    suitable_sites.sort(
+        key=lambda item: item["distance_km"]
     )
+
+    # Return only the 5 nearest sites.
+    return suitable_sites[:max_results]
