@@ -1,37 +1,49 @@
-// In development, requests go through Vite's proxy (`/backend`) so the
-// browser does not need cross-origin access to the API. For a deployed app,
-// set VITE_API_BASE_URL to the public backend URL (for example,
-// https://api.example.gov.in).
+// ============================================================
+// SURAKSHIT - API SERVICE
+// Frontend: React + Vite
+// Backend: FastAPI
+// ============================================================
+
+// In development, Vite proxies /backend → http://127.0.0.1:8000
+// For production, set VITE_API_BASE_URL in .env
+
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL || "/backend"
 ).replace(/\/$/, "");
+
+// ============================================================
+// Generic API Request
+// ============================================================
 
 async function apiRequest(endpoint, options = {}) {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     headers: {
       "Content-Type": "application/json",
-      ...options.headers,
+      ...(options.headers || {}),
     },
     ...options,
   });
 
   if (!response.ok) {
-    let errorMessage = `API request failed: ${response.status}`;
+    let message = `API request failed: ${response.status}`;
 
     try {
       const errorData = await response.json();
 
-      if (errorData.detail) {
-        errorMessage = errorData.detail;
+      if (errorData?.detail) {
+        message =
+          typeof errorData.detail === "string"
+            ? errorData.detail
+            : JSON.stringify(errorData.detail);
       }
     } catch {
       // Ignore JSON parsing errors
     }
 
-    throw new Error(errorMessage);
+    throw new Error(message);
   }
 
-  // Some mutation endpoints can legitimately return no body.
+  // No content
   if (response.status === 204) {
     return null;
   }
@@ -39,16 +51,26 @@ async function apiRequest(endpoint, options = {}) {
   return response.json();
 }
 
-// -----------------------------
-// Habitations
-// -----------------------------
+// ============================================================
+// HEALTH
+// ============================================================
+
+export async function checkBackendHealth() {
+  return apiRequest("/health");
+}
+
+// ============================================================
+// HABITATIONS
+// ============================================================
 
 export async function getHabitations() {
   return apiRequest("/api/habitations");
 }
 
 export async function getHabitation(habitationId) {
-  return apiRequest(`/api/habitations/${encodeURIComponent(habitationId)}`);
+  return apiRequest(
+    `/api/habitations/${encodeURIComponent(habitationId)}`
+  );
 }
 
 export async function getHabitationRisk(habitationId) {
@@ -57,21 +79,41 @@ export async function getHabitationRisk(habitationId) {
   );
 }
 
-// -----------------------------
-// Hazards
-// -----------------------------
+export async function getRelocationSitesForHabitation(
+  habitationId
+) {
+  return apiRequest(
+    `/api/habitations/${encodeURIComponent(
+      habitationId
+    )}/relocation-sites`
+  );
+}
+
+export async function getRecommendation(habitationId) {
+  return apiRequest(
+    `/api/habitations/${encodeURIComponent(
+      habitationId
+    )}/recommendation`
+  );
+}
+
+// ============================================================
+// HAZARDS
+// ============================================================
 
 export async function getHazards() {
   return apiRequest("/api/hazards");
 }
 
 export async function getHazardsForHabitation(habitationId) {
-  return apiRequest(`/api/hazards/${encodeURIComponent(habitationId)}`);
+  return apiRequest(
+    `/api/hazards/${encodeURIComponent(habitationId)}`
+  );
 }
 
-// -----------------------------
-// Risk Zones
-// -----------------------------
+// ============================================================
+// RISK ZONES
+// ============================================================
 
 export async function getRiskZones({
   district = "",
@@ -90,6 +132,10 @@ export async function getRiskZones({
   return apiRequest(`/api/risk-zones?${params.toString()}`);
 }
 
+// ============================================================
+// RED ZONES
+// ============================================================
+
 export async function getRedZones({
   district = "",
   limit = 50,
@@ -107,43 +153,31 @@ export async function getRedZones({
   return apiRequest(`/api/red-zones?${params.toString()}`);
 }
 
-// -----------------------------
-// Relocation Sites
-// -----------------------------
+// ============================================================
+// RELOCATION SITES
+// ============================================================
 
 export async function getRelocationSites() {
   return apiRequest("/api/relocation-sites");
 }
 
 export async function getRelocationSite(siteId) {
-  return apiRequest(`/api/relocation-sites/${encodeURIComponent(siteId)}`);
+  return apiRequest(
+    `/api/relocation-sites/${encodeURIComponent(siteId)}`
+  );
 }
 
 export async function getRelocationSiteCapacity(siteId) {
   return apiRequest(
-    `/api/relocation-sites/${encodeURIComponent(siteId)}/capacity`
+    `/api/relocation-sites/${encodeURIComponent(
+      siteId
+    )}/capacity`
   );
 }
 
-export async function getRelocationSitesForHabitation(habitationId) {
-  return apiRequest(
-    `/api/habitations/${encodeURIComponent(habitationId)}/relocation-sites`
-  );
-}
-
-// -----------------------------
-// Recommendation
-// -----------------------------
-
-export async function getRecommendation(habitationId) {
-  return apiRequest(
-    `/api/habitations/${encodeURIComponent(habitationId)}/recommendation`
-  );
-}
-
-// -----------------------------
-// ML Flood Prediction
-// -----------------------------
+// ============================================================
+// FLOOD / RISK PREDICTION
+// ============================================================
 
 export async function predictFloodRisk(inputData) {
   return apiRequest("/api/predict-risk", {
@@ -152,10 +186,50 @@ export async function predictFloodRisk(inputData) {
   });
 }
 
-// -----------------------------
-// Backend Health
-// -----------------------------
+// ============================================================
+// OPTIONAL GENERIC HELPERS
+// ============================================================
 
-export async function checkBackendHealth() {
-  return apiRequest("/health");
+// GET request helper
+export async function apiGet(endpoint) {
+  return apiRequest(endpoint);
 }
+
+// POST request helper
+export async function apiPost(endpoint, data) {
+  return apiRequest(endpoint, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+// ============================================================
+// DEFAULT EXPORT
+// ============================================================
+
+const api = {
+  checkBackendHealth,
+
+  getHabitations,
+  getHabitation,
+  getHabitationRisk,
+  getRelocationSitesForHabitation,
+  getRecommendation,
+
+  getHazards,
+  getHazardsForHabitation,
+
+  getRiskZones,
+  getRedZones,
+
+  getRelocationSites,
+  getRelocationSite,
+  getRelocationSiteCapacity,
+
+  predictFloodRisk,
+
+  apiGet,
+  apiPost,
+};
+
+export default api;
