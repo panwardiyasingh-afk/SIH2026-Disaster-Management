@@ -617,7 +617,7 @@ export default function Header({
       {/* =====================================================
           BLUE NAVIGATION
           ===================================================== */}
-
+{/* 
       <div className="h-[5px] bg-navy-600" />
 
       <nav
@@ -692,7 +692,7 @@ export default function Header({
 
         </div>
 
-      </nav>
+      </nav> */}
 
       <div
         className="hidden"
