@@ -43,18 +43,18 @@ export default function Sidebar({
         <button
           aria-label="Close navigation"
           onClick={onClose}
-          className="fixed inset-0 z-30 bg-navy-950/50 lg:hidden"
+          className="fixed inset-0 z-[2050] bg-navy-950/50 lg:hidden"
         />
       )}
 
       {/* Sidebar */}
       <aside
         className={`
-          fixed z-40 inset-y-0 left-0 w-64
+          fixed inset-y-0 left-0 z-[2100] w-64
           bg-navy-900 text-white
           flex flex-col
           transition-transform duration-300 ease-out
-          lg:translate-x-0
+          lg:z-40 lg:translate-x-0
           ${open ? 'translate-x-0' : '-translate-x-full'}
         `}
       >

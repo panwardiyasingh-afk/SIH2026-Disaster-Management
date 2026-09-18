@@ -7,6 +7,7 @@ import {
   Activity,
   Route,
   Loader2,
+  Menu,
 } from 'lucide-react'
 
 import { getRiskZones } from '../services/api'
@@ -14,6 +15,7 @@ import { assamDistrictsGeoJSON } from "../data/mockData";
 
 export default function Header({
   onMenuClick,
+  sidebarOpen,
   onSelectDistrict,
   onNavigate,
 }) {
@@ -332,6 +334,17 @@ export default function Header({
 
         <div className="ml-auto flex shrink-0 items-center gap-4 lg:gap-6">
 
+          <button
+            type="button"
+            onClick={onMenuClick}
+            aria-label="Open navigation menu"
+            aria-expanded={sidebarOpen}
+            className="inline-flex h-10 items-center gap-2 rounded-lg bg-navy-600 px-3 text-xs font-bold text-white shadow-sm transition-colors hover:bg-navy-700 lg:hidden"
+          >
+            <Menu size={19} />
+            Menu
+          </button>
+
           {/* ================= SEARCH ================= */}
 
           <div className="relative hidden w-[230px] sm:block lg:w-[300px]">
@@ -608,9 +621,20 @@ export default function Header({
       <div className="h-[5px] bg-navy-600" />
 
       <nav
-        className="flex min-h-[66px] items-center justify-end gap-6 bg-[#2F66B0] px-5 py-3 text-white sm:px-8 lg:px-12"
+        className="flex min-h-[52px] items-center justify-end gap-6 bg-[#2F66B0] px-5 py-2 text-white sm:px-8 lg:min-h-[66px] lg:px-12 lg:py-3"
         aria-label="National disaster portal"
       >
+
+        <button
+          type="button"
+          onClick={onMenuClick}
+          aria-label="Open navigation menu"
+          aria-expanded={sidebarOpen}
+          className="flex items-center gap-2 text-sm font-bold lg:hidden"
+        >
+          <Menu size={18} />
+          Browse sections
+        </button>
 
         <div className="hidden items-center gap-6 text-[15px] font-semibold lg:flex">
 

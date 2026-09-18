@@ -336,6 +336,7 @@ export default function App() {
           onMenuClick={() =>
             setSidebarOpen(true)
           }
+          sidebarOpen={sidebarOpen}
           onNavigate={handleNavigate}
           onSelectDistrict={(district) => {
             setSelectedDistrict(
