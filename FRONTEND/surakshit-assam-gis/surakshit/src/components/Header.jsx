@@ -288,7 +288,7 @@ export default function Header({
   }
 
   return (
-    <header className="sticky top-0 z-20 border-b border-line-200 bg-white">
+    <header className="sticky top-0 z-[2000] isolate border-b border-line-200 bg-white">
 
       {/* =====================================================
           GOVERNMENT HEADER

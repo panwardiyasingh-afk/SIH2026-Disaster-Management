@@ -1357,7 +1357,7 @@ export default function AssamMap({
     };
 
   return (
-    <div className="relative h-full min-h-[600px] overflow-hidden rounded-2xl border border-white/10 bg-slate-950">
+    <div className="relative z-0 isolate h-full min-h-[600px] overflow-hidden rounded-2xl border border-white/10 bg-slate-950">
 
       <style>{`
         .assam-district-tooltip,
