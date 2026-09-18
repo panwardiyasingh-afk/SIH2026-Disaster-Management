@@ -84,7 +84,7 @@ function SiteCard({ site, index }) {
       {/* Glow */}
 
       <div
-        className="pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-30"
+        className="pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full opacity-0 blur-2xl transition-opacity duration-150 group-hover:opacity-30"
         style={{
           backgroundColor: tone,
         }}
